@@ -1,24 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class Greenhouse {
-    public string name;
-    public float value;
-    
-}
+using UnityEngine.UI;
 
 public class GreenhouseController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
+    public GameObject Popup;
+    public Text PopupText;
 
+    void OnTriggerEnter2D(Collider2D other){
+        PlayerController player = other.GetComponent<PlayerController>();
+
+        Popup.SetActive(true);
+        PopupText.text = "Press 'F' to Enter";
+        if(player != null){
+            player.SetGreenhouse(this);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    void OnTriggerExit2D(Collider2D other){
+        PlayerController player = other.GetComponent<PlayerController>();
+
+        Popup.SetActive(false);
+        if(player != null){
+            player.SetGreenhouse(null);
+        }
     }
 }

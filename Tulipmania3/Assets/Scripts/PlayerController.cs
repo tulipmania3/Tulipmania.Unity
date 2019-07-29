@@ -15,9 +15,15 @@ public class PlayerController : MonoBehaviour
 {
 
     public float speed;
+    public GameObject greenhouseUI;
+
+
     Rigidbody2D rigidbody2d;
     Animator animator;
     Direction direction = Direction.Idle;
+    Direction oldDirection = Direction.Idle;
+
+    GreenhouseController greenhouse;
 
     // Start is called before the first frame update
     void Start()
@@ -25,45 +31,80 @@ public class PlayerController : MonoBehaviour
 
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+
+        animator.SetFloat("Move X", -0.01f);
+        animator.SetFloat("Move Y", -0.1f);
     }
 
     // Update is called once per frame
     void Update()
     {
+        Move();
+        if(Input.GetKeyDown(KeyCode.F)){
+            if(greenhouse != null){
+                openGreenhouseUI();
+            }
+        }
+    }
+
+    public void SetGreenhouse(GreenhouseController _greenhouse){
+        greenhouse = _greenhouse;
+    }
+
+    //Horrible Move Logic
+    private void Move()
+    {
+        
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
+
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            direction = Direction.Up;
+        }
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            direction = Direction.Left;
+        }
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            direction = Direction.Down;
+        }
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            direction = Direction.Right;
+        }
 
         switch (direction)
         {
             case Direction.Up:
-                if (vertical <= 0)
+                if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.UpArrow))
                 {
-                    ChangeDirection(horizontal, vertical);
+                    direction = Direction.Idle;
                 }
                 break;
             case Direction.Left:
-                if (horizontal >= 0)
+                if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow))
                 {
-                    ChangeDirection(horizontal, vertical);
+                    direction = Direction.Idle;
                 }
                 break;
             case Direction.Down:
-                if (vertical >= 0)
+                if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow))
                 {
-                    ChangeDirection(horizontal, vertical);
+                    direction = Direction.Idle;
                 }
                 break;
             case Direction.Right:
-                if (horizontal <= 0)
+                if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow))
                 {
-                    ChangeDirection(horizontal, vertical);
+                    direction = Direction.Idle;
                 }
                 break;
-            case Direction.Idle:
-                ChangeDirection(horizontal, vertical);
+            default:
                 break;
         }
-        
+
         Vector2 position = rigidbody2d.position;
 
         switch (direction)
@@ -89,35 +130,44 @@ public class PlayerController : MonoBehaviour
                 animator.SetFloat("Move Y", 0);
                 break;
             case Direction.Idle:
-                animator.SetFloat("Move X", 0);
-                animator.SetFloat("Move Y", 0);
+                switch (oldDirection)
+                {
+                    case Direction.Up:
+                        animator.SetFloat("Move X", -0.1f);
+                        animator.SetFloat("Move Y", 0.5f);
+                        break;
+                    case Direction.Left:
+                        animator.SetFloat("Move X", -0.5f);
+                        animator.SetFloat("Move Y", -0.1f);
+                        break;
+                    case Direction.Down:
+                        animator.SetFloat("Move X", -0.1f);
+                        animator.SetFloat("Move Y", -0.5f);
+                        break;
+                    case Direction.Right:
+                        animator.SetFloat("Move X", 0.5f);
+                        animator.SetFloat("Move Y", 0.1f);
+                        break;
+                    default:
+                        break;
+
+                }
                 break;
+        }
+
+        if (direction != oldDirection)
+        {
+            oldDirection = direction;
         }
 
         rigidbody2d.MovePosition(position);
     }
 
-    private void ChangeDirection(float horizontal, float vertical)
-    {
-        if (vertical > 0)
-        {
-            direction = Direction.Down;
-        }
-        else if (vertical < 0)
-        {
-            direction = Direction.Up;
-        }
-        else if (horizontal < 0)
-        {
-            direction = Direction.Right;
-        }
-        else if (horizontal > 0)
-        {
-            direction = Direction.Left;
-        }
-        else
-        {
-            direction = Direction.Idle;
-        }
+    public void closeGreenhouseUI(){
+        greenhouseUI.SetActive(false);
+    }
+
+    public void openGreenhouseUI() {
+        greenhouseUI.SetActive(true);
     }
 }
